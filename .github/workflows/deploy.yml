@@ -47,7 +47,7 @@ jobs:
         username: ubuntu
         key: ${{ secrets.SERVER_SSH_KEY }}
         script: |
-          cd /var/www/html/your-laravel-project
+          cd /var/www/html/zavisoft
           
           echo "🚀 Fetching latest code from Git..."
           git pull origin main
