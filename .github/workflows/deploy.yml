@@ -1,0 +1,70 @@
+name: Laravel CI-CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  # ---- PHASE 1: CONTINUOUS INTEGRATION (TESTING) ----
+  laravel-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP Environment
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, mysql, zip
+
+    - name: Copy .env.example to .env for Testing
+      run: cp .env.example .env
+
+    - name: Install Composer Dependencies
+      run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+    - name: Generate Application Key
+      run: php artisan key:generate
+
+    - name: Run PHPUnit Tests
+      run: vendor/bin/phpunit
+
+  # ---- PHASE 2: CONTINUOUS DELIVERY (DEPLOYMENT) ----
+  deploy-to-production:
+    needs: laravel-tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Deploy to Server via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ubuntu
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        script: |
+          cd /var/www/html/your-laravel-project
+          
+          echo "🚀 Fetching latest code from Git..."
+          git pull origin main
+          
+          echo "📦 Installing Production Dependencies..."
+          composer install --no-dev --optimize-autoloader --no-interaction
+          
+          echo "⚡ Optimizing Laravel Configuration..."
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          
+          echo "🗄️ Running Database Migrations..."
+          php artisan migrate --force
+          
+          echo "🧹 Clearing Cache..."
+          php artisan cache:clear
+          
+          echo "🎉 Deployment Completed Successfully!"
+
