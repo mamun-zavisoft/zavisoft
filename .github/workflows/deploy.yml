@@ -19,7 +19,7 @@ jobs:
 # ===============================
 # 1. QUALITY GATE (CI)
 # ===============================
-  quality-gate:
+  ci-quality-check:
 
     runs-on: ubuntu-latest
 
@@ -79,12 +79,12 @@ jobs:
 # ===============================
     - name: PHPStan Install
       run: composer require phpstan/phpstan --dev
-      
+
 # ===============================
 # STATIC ANALYSIS (PHPStan + Larastan)
 # ===============================
     - name: PHPStan Analysis
-      run: ./vendor/bin/phpstan analyse --memory-limit=2G
+      run: ./vendor/bin/phpstan analyse app tests --memory-limit=2G
 
 # ===============================
 # SECURITY SCANS
@@ -195,7 +195,7 @@ jobs:
 # ===============================
   deploy-production:
 
-    needs: quality-gate
+    needs: ci-quality-check
     runs-on: ubuntu-latest
 
     if: github.ref == 'refs/heads/main'
