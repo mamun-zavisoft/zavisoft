@@ -111,11 +111,10 @@ jobs:
     - name: Architecture Tests
       run: php artisan test --testsuite=Architecture
 
-    - name: Install phpcpd
-      run: composer require --dev sebastian/phpcpd --no-interaction
-
     - name: Duplicate Code Check
-      run: ./vendor/bin/phpcpd app --min-lines=20 --min-tokens=100
+      run: |
+        curl -L https://phar.phpunit.de/phpcpd.phar -o phpcpd.phar
+        php phpcpd.phar app --min-lines=20 --min-tokens=100
 
 # ===============================
 # DATABASE
