@@ -111,6 +111,9 @@ jobs:
     - name: Architecture Tests
       run: php artisan test --testsuite=Architecture
 
+    - name: Install phpcpd
+      run: composer require --dev sebastian/phpcpd --no-interaction
+
     - name: Duplicate Code Check
       run: ./vendor/bin/phpcpd app --min-lines=20 --min-tokens=100
 
