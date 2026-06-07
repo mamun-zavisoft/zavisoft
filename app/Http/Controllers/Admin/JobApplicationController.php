@@ -16,7 +16,7 @@ class JobApplicationController extends Controller
                 'id' => $application->id,
                 'job' => [
                     'id' => $application->job->id,
-                    'name' => $application->job->name
+                    'name' => $application->job->name,
                 ],
                 'name' => $application->name,
                 'phone' => $application->phone,
@@ -27,29 +27,29 @@ class JobApplicationController extends Controller
                 'cv' => $application->cv,
                 'status' => $application->status,
                 'interview_date' => $application->interview_date,
-                'interview_mark' => $application->interview_mark
+                'interview_mark' => $application->interview_mark,
             ];
         });
 
         return view('backend.job-applications.index', [
-            'applications' => $applications
+            'applications' => $applications,
         ]);
     }
 
-   public function viewCV($name)
-{
-     $application = JobApplication::where('name', $name)->firstOrFail();
-    $filePath = public_path($application->cv);
+    public function viewCV($name)
+    {
+        $application = JobApplication::where('name', $name)->firstOrFail();
+        $filePath = public_path($application->cv);
 
-    if (!file_exists($filePath)) {
-        abort(404, 'CV file not found.');
+        if (! file_exists($filePath)) {
+            abort(404, 'CV file not found.');
+        }
+
+        return response()->file($filePath, [
+            'Content-Type' => mime_content_type($filePath),
+            'Content-Disposition' => 'inline',
+        ]);
     }
-
-    return response()->file($filePath, [
-        'Content-Type' => mime_content_type($filePath),
-        'Content-Disposition' => 'inline'
-    ]);
-}
 
     public function update(UpdateJobApplicationRequest $request, $id)
     {
@@ -78,23 +78,22 @@ class JobApplicationController extends Controller
     }
 
     // delete job application logic
-public function destroy($id)
-{
-    $application = JobApplication::findOrFail($id);
+    public function destroy($id)
+    {
+        $application = JobApplication::findOrFail($id);
 
-    if (!empty($application->cv)) {
-        $fullPath = public_path($application->cv);
+        if (! empty($application->cv)) {
+            $fullPath = public_path($application->cv);
 
-        if (File::exists($fullPath)) {
-            File::delete($fullPath);
+            if (File::exists($fullPath)) {
+                File::delete($fullPath);
+            }
         }
+
+        $application->delete();
+
+        return redirect()
+            ->route('admin.job-applications')
+            ->with('success', 'Application deleted successfully.');
     }
-
-    $application->delete();
-
-    return redirect()
-        ->route('admin.job-applications')
-        ->with('success', 'Application deleted successfully.');
-}
-
 }

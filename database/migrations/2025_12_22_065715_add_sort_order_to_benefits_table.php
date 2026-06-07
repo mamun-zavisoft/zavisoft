@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('benefits', function (Blueprint $table) {
-             Schema::table('benefits', function (Blueprint $table) {
-            $table->integer('sort_order')->default(0)->after('short_description');
-        });
+            Schema::table('benefits', function (Blueprint $table) {
+                $table->integer('sort_order')->default(0)->after('short_description');
+            });
         });
     }
 
@@ -23,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-       Schema::table('benefits', function (Blueprint $table) {
+        Schema::table('benefits', function (Blueprint $table) {
             $table->dropColumn('sort_order');
         });
     }

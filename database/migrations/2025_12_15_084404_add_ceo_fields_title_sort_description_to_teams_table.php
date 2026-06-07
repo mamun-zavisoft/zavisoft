@@ -9,7 +9,7 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-   public function up(): void
+    public function up(): void
     {
         Schema::table('teams', function (Blueprint $table) {
             // Add new columns
@@ -18,7 +18,6 @@ return new class extends Migration
         });
     }
 
-  
     public function down(): void
     {
         Schema::table('teams', function (Blueprint $table) {

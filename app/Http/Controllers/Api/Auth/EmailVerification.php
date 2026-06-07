@@ -7,7 +7,6 @@ use Facades\App\Interfaces\OtpRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Log;
-use function Illuminate\Log\log;
 
 class EmailVerification extends Controller
 {

@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\ServiceRequest;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Str;
 
 class ServiceController extends Controller
 {
     public function index()
     {
-        $services = Service::with('category')->select('id', 'category_id','heading', 'short_description', 'service_image')->get();
+        $services = Service::with('category')->select('id', 'category_id', 'heading', 'short_description', 'service_image')->get();
 
         return view('backend.services.index', compact('services'));
     }
@@ -21,6 +21,7 @@ class ServiceController extends Controller
     public function create()
     {
         $categories = ServiceCategory::select('id', 'name')->orderBy('name')->get();
+
         return view('backend.services.create', compact('categories'));
     }
 
@@ -28,6 +29,7 @@ class ServiceController extends Controller
     {
         $service = Service::select('id', 'category_id', 'heading', 'short_description', 'service_image')->where('id', $id)->first();
         $categories = ServiceCategory::select('id', 'name')->orderBy('name')->get();
+
         return view('backend.services.edit', compact('service', 'categories'));
     }
 
@@ -40,7 +42,7 @@ class ServiceController extends Controller
         if ($request->hasFile('service_image')) {
             $folder = 'services';
 
-            if (!Storage::disk('public')->exists($folder)) {
+            if (! Storage::disk('public')->exists($folder)) {
                 Storage::disk('public')->makeDirectory($folder);
             }
 
@@ -63,7 +65,7 @@ class ServiceController extends Controller
             $folder = 'services';
 
             // Ensure folder exists
-            if (!Storage::disk('public')->exists($folder)) {
+            if (! Storage::disk('public')->exists($folder)) {
                 Storage::disk('public')->makeDirectory($folder);
             }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class TeamRequest extends FormRequest
@@ -17,21 +18,23 @@ class TeamRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         $isRequest = $this->method() == 'POST' ? 'required' : 'nullable';
+
         return [
-        'name' => 'required|string|max:255',
-        'designation' => 'required|string|max:255',
-        'image' => $isRequest.'|image|mimes:jpg,jpeg,png,webp|max:2048',
-        'linkedin' => 'nullable|url',
-        'sl_no' => 'nullable|integer|unique:teams,sl_no,'.$this->id,
-        'title' => 'nullable|string|max:255',
-        'short_description' => 'nullable|string|max:255',
-    ];
+            'name' => 'required|string|max:255',
+            'designation' => 'required|string|max:255',
+            'image' => $isRequest.'|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'linkedin' => 'nullable|url',
+            'sl_no' => 'nullable|integer|unique:teams,sl_no,'.$this->id,
+            'title' => 'nullable|string|max:255',
+            'short_description' => 'nullable|string|max:255',
+        ];
     }
+
     public function messages(): array
     {
         return [
@@ -54,7 +57,6 @@ class TeamRequest extends FormRequest
             'title.max' => 'Title must not exceed 255 characters.',
             'short_description.string' => 'Short Description must be a string.',
             'short_description.max' => 'Short Description must not exceed 255 characters.',
-
 
         ];
     }

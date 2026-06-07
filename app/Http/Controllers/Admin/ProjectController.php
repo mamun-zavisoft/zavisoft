@@ -14,12 +14,14 @@ class ProjectController extends Controller
     public function index()
     {
         $projects = Project::with('category')->select('category_id', 'id', 'title')->orderByDesc('id')->get();
+
         return view('backend.projects.index', compact('projects'));
     }
 
     public function create()
     {
         $categories = ProjectCategory::select('id', 'name')->orderBy('name')->get();
+
         return view('backend.projects.create', compact('categories'));
     }
 
@@ -28,9 +30,7 @@ class ProjectController extends Controller
         $categoryName = ProjectCategory::where('id', $request->category_id)->value('name');
 
         $data = $request->validated();
-        $data['slug'] = Str::slug($categoryName). '-' . Str::slug($data['title']);
-
-
+        $data['slug'] = Str::slug($categoryName).'-'.Str::slug($data['title']);
 
         if ($request->hasFile('banner_image')) {
             $data['banner_image'] = $request->file('banner_image')->store('projects/banners', 'public');
@@ -62,53 +62,51 @@ class ProjectController extends Controller
         return view('backend.projects.edit', compact('project', 'categories'));
     }
 
-     public function update(ProjectRequest $request, $id)
-{
-    $data = $request->validated();
-    $data['slug'] = Str::slug($data['title']);
+    public function update(ProjectRequest $request, $id)
+    {
+        $data = $request->validated();
+        $data['slug'] = Str::slug($data['title']);
 
-    $project = Project::findOrFail($id);
-    
-    if ($request->hasFile('banner_image')) {
-        if ($project->banner_image && Storage::disk('public')->exists($project->banner_image)) {
-            Storage::disk('public')->delete($project->banner_image);
+        $project = Project::findOrFail($id);
+
+        if ($request->hasFile('banner_image')) {
+            if ($project->banner_image && Storage::disk('public')->exists($project->banner_image)) {
+                Storage::disk('public')->delete($project->banner_image);
+            }
+            $data['banner_image'] = $request->file('banner_image')->store('projects/banners', 'public');
         }
-        $data['banner_image'] = $request->file('banner_image')->store('projects/banners', 'public');
-    }
 
-    
+        // A) Load existing images
+        $oldImages = json_decode($project->gallery_image ?? '[]', true);
 
-    // A) Load existing images
-    $oldImages = json_decode($project->gallery_image ?? '[]', true);
+        // B) Get removed image names from hidden field
+        $removedImages = json_decode($request->removed_images ?? '[]', true);
 
-    // B) Get removed image names from hidden field
-    $removedImages = json_decode($request->removed_images ?? '[]', true);
-
-    // C) Delete removed images from storage + remove from array
-    if (!empty($removedImages)) {
-        foreach ($removedImages as $img) {
-            if (($key = array_search($img, $oldImages)) !== false) {
-                unset($oldImages[$key]); 
-                Storage::disk('public')->delete($img); 
+        // C) Delete removed images from storage + remove from array
+        if (! empty($removedImages)) {
+            foreach ($removedImages as $img) {
+                if (($key = array_search($img, $oldImages)) !== false) {
+                    unset($oldImages[$key]);
+                    Storage::disk('public')->delete($img);
+                }
             }
         }
-    }
 
-    // D) Re-index array
-    $finalImages = array_values($oldImages);
+        // D) Re-index array
+        $finalImages = array_values($oldImages);
 
-    // E) Store new uploaded images
-    if ($request->hasFile('new_gallery_images')) { 
-        foreach ($request->file('new_gallery_images') as $file) {
-            $path = $file->store('projects/galleries', 'public');
-            $finalImages[] = $path;
+        // E) Store new uploaded images
+        if ($request->hasFile('new_gallery_images')) {
+            foreach ($request->file('new_gallery_images') as $file) {
+                $path = $file->store('projects/galleries', 'public');
+                $finalImages[] = $path;
+            }
         }
+
+        // F) Save merged old + new images
+        $data['gallery_image'] = json_encode($finalImages);
+        $project->update($data);
+
+        return redirect()->route('admin.project.index')->with('success', 'Project updated successfully.');
     }
-
-    // F) Save merged old + new images
-    $data['gallery_image'] = json_encode($finalImages);
-    $project->update($data);
-
-    return redirect()->route('admin.project.index')->with('success', 'Project updated successfully.');
-}
 }

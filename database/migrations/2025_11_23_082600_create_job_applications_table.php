@@ -12,20 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('job_applications', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('job_id')->constrained('job_circulars')->onDelete('cascade');
-        $table->string('name');
-        $table->string('email');
-        $table->string('phone');
-        $table->string('github')->nullable();
-        $table->string('linkedin')->nullable();
-        $table->text('about');
-        $table->string('cv');
-        $table->enum('status', ['pending', 'shortlisted', 'interview_scheduled', 'interviewed', 'hired'])->default('pending');
-        $table->dateTime('interview_date')->nullable();
-        $table->float('interview_mark')->nullable();
-        $table->timestamps();
-    });
+            $table->id();
+            $table->foreignId('job_id')->constrained('job_circulars')->onDelete('cascade');
+            $table->string('name');
+            $table->string('email');
+            $table->string('phone');
+            $table->string('github')->nullable();
+            $table->string('linkedin')->nullable();
+            $table->text('about');
+            $table->string('cv');
+            $table->enum('status', ['pending', 'shortlisted', 'interview_scheduled', 'interviewed', 'hired'])->default('pending');
+            $table->dateTime('interview_date')->nullable();
+            $table->float('interview_mark')->nullable();
+            $table->timestamps();
+        });
     }
 
     /**

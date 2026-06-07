@@ -18,7 +18,7 @@ class JobApplication extends Model
         'cv',
         'status',
         'interview_date',
-        'interview_mark'
+        'interview_mark',
     ];
 
     public function job(): BelongsTo

@@ -14,10 +14,10 @@ class JobApplicationController extends Controller
         if ($request->hasFile('cv')) {
 
             $file = $request->file('cv');
-            $fileName = time() . '_' . $file->getClientOriginalName();
+            $fileName = time().'_'.$file->getClientOriginalName();
 
             $file->move(public_path('cv'), $fileName);
-            $cvPath = 'cv/' . $fileName;
+            $cvPath = 'cv/'.$fileName;
         }
 
         // Store in database
@@ -29,13 +29,13 @@ class JobApplicationController extends Controller
             'github' => $request->github,
             'linkedin' => $request->linkedin,
             'about' => $request->about,
-            'cv' => $cvPath
+            'cv' => $cvPath,
         ]);
 
         return response()->json([
             'status' => true,
             'message' => 'Your application has been received. We will contact you shortly regarding the next steps.',
-            'data' => $application
+            'data' => $application,
         ]);
     }
 }

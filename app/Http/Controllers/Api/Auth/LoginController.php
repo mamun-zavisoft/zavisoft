@@ -12,7 +12,7 @@ class LoginController extends Controller
 {
     public function login(LoginRequest $request): JsonResponse
     {
-        if (!Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+        if (! Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             return $this->response(__('Password is incorrect'), [], 401);
         }
 

@@ -13,7 +13,7 @@ class ProjectCategorySeeder extends Seeder
         $categories = [
             'Ecommerce',
             'Mobile App',
-            'Admin Dashboard'
+            'Admin Dashboard',
         ];
 
         foreach ($categories as $name) {
@@ -23,5 +23,4 @@ class ProjectCategorySeeder extends Seeder
             ]);
         }
     }
-
 }

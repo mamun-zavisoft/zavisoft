@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Benefit extends Model
 {
     protected $fillable = [
-       'icon',
+        'icon',
         'short_description',
         'sort_order',
     ];

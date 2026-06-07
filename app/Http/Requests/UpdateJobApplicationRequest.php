@@ -16,7 +16,7 @@ class UpdateJobApplicationRequest extends FormRequest
         return [
             'status' => 'required|in:pending,shortlisted,interview_scheduled,interviewed,hired',
             'interview_date' => 'nullable|date',
-            'interview_mark' => 'nullable'
+            'interview_mark' => 'nullable',
         ];
     }
 }

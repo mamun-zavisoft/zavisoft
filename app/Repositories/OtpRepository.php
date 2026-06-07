@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Interfaces\OtpRepositoryInterface;
 use App\Models\Otp;
-use Illuminate\Database\Eloquent\Collection;
 
 class OtpRepository implements OtpRepositoryInterface
 {

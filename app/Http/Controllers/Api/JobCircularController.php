@@ -24,19 +24,19 @@ class JobCircularController extends Controller
                 'responsibilities',
                 'requirement',
                 'about_company',
-                'created_at'
+                'created_at',
             ])->whereStatus(1)->get();
 
             return response()->json([
                 'success' => true,
                 'data' => $careers,
-                'message' => 'Careers retrieved successfully.'
+                'message' => 'Careers retrieved successfully.',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve careers.',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], $e->getCode());
         }
     }
@@ -44,25 +44,25 @@ class JobCircularController extends Controller
     public function show($slug): JsonResponse
     {
         try {
-            $career = JobCircular::where('slug',$slug)->firstOrFail();
+            $career = JobCircular::where('slug', $slug)->firstOrFail();
 
-            if (!$career) {
+            if (! $career) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Career not found.'
+                    'message' => 'Career not found.',
                 ], 404);
             }
 
             return response()->json([
                 'success' => true,
                 'data' => $career,
-                'message' => 'Career retrieved successfully.'
+                'message' => 'Career retrieved successfully.',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve career.',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], $e->getCode());
         }
     }

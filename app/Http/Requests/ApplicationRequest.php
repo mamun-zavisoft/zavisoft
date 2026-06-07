@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ApplicationRequest extends FormRequest
@@ -17,7 +18,7 @@ class ApplicationRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -29,7 +30,7 @@ class ApplicationRequest extends FormRequest
             'github' => 'nullable|url',
             'linkedin' => 'nullable|url',
             'about' => 'required|string|max:550',
-            'cv' => 'required|file|mimes:pdf|max:2048'
+            'cv' => 'required|file|mimes:pdf|max:2048',
         ];
     }
 
@@ -58,7 +59,7 @@ class ApplicationRequest extends FormRequest
             // CV
             'cv.file' => 'CV must be a valid file.',
             'cv.mimes' => 'Only PDF files are allowed.',
-            'cv.max' => 'CV size may not exceed 2MB.'
+            'cv.max' => 'CV size may not exceed 2MB.',
         ];
     }
 }

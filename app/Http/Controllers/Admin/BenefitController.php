@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Storage;
 
 class BenefitController extends Controller
 {
-   
     public function index()
     {
         $benefits = Benefit::select('id', 'short_description', 'icon')
@@ -20,7 +19,6 @@ class BenefitController extends Controller
         return view('backend.basics-benefits.index', compact('benefits'));
     }
 
-   
     public function create()
     {
         $benefits = Benefit::orderBy('sort_order')->get();
@@ -28,7 +26,6 @@ class BenefitController extends Controller
         return view('backend.basics-benefits.create', compact('benefits'));
     }
 
-   
     public function store(BenefitStoreRequest $request)
     {
         $validated = $request->validated();
@@ -45,7 +42,7 @@ class BenefitController extends Controller
             Benefit::create([
                 'short_description' => $benefitData['short_description'],
                 'icon' => $iconPath,
-                'sort_order' => $index, 
+                'sort_order' => $index,
             ]);
         }
 
@@ -57,6 +54,7 @@ class BenefitController extends Controller
     public function edit($id)
     {
         $benefit = Benefit::findOrFail($id);
+
         return view('backend.basics-benefits.edit', compact('benefit'));
     }
 
@@ -84,7 +82,6 @@ class BenefitController extends Controller
             ->with('success', 'Benefit updated successfully.');
     }
 
-  
     public function destroy($id)
     {
         $benefit = Benefit::findOrFail($id);

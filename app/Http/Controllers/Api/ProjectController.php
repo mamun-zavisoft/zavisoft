@@ -15,7 +15,7 @@ class ProjectController extends Controller
         return response()->json([
             'success' => true,
             'data' => $data,
-            'message' => 'Projects retrieved successfully.'
+            'message' => 'Projects retrieved successfully.',
         ]);
     }
 
@@ -26,7 +26,7 @@ class ProjectController extends Controller
         return response()->json([
             'success' => true,
             'data' => $data,
-            'message' => 'Project category retrieved successfully.'
+            'message' => 'Project category retrieved successfully.',
         ]);
     }
 
@@ -38,7 +38,7 @@ class ProjectController extends Controller
         return response()->json([
             'success' => true,
             'data' => $data,
-            'message' => 'Category wise project  retrieved successfully.'
+            'message' => 'Category wise project  retrieved successfully.',
         ]);
     }
 
@@ -62,18 +62,17 @@ class ProjectController extends Controller
             ->where('slug', $slug)
             ->first();
 
-        if (!$project) {
+        if (! $project) {
             return response()->json([
                 'success' => false,
-                'message' => 'Project not found.'
+                'message' => 'Project not found.',
             ], 404);
         }
 
         return response()->json([
             'success' => true,
             'data' => $project,
-            'message' => 'Project details retrieved successfully.'
+            'message' => 'Project details retrieved successfully.',
         ]);
     }
-
 }

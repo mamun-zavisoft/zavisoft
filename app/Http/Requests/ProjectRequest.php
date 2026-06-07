@@ -31,8 +31,8 @@ class ProjectRequest extends FormRequest
             'business_result' => 'required|string',
 
             // Required on create, optional on update
-            'banner_image' => ($isCreate ? 'required' : 'nullable') . '|mimes:jpg,jpeg,png,webp,svg|max:2048',
-            'gallery_image'   => ($isCreate ? 'required' : 'nullable') . '|array',
+            'banner_image' => ($isCreate ? 'required' : 'nullable').'|mimes:jpg,jpeg,png,webp,svg|max:2048',
+            'gallery_image' => ($isCreate ? 'required' : 'nullable').'|array',
             'gallery_image.*' => 'mimes:jpg,jpeg,png,webp,svg|max:5120',
 
             'challenge' => 'required|string',
@@ -49,5 +49,4 @@ class ProjectRequest extends FormRequest
             'title.unique' => 'A project with this title already exists in the selected category.',
         ];
     }
-
 }
