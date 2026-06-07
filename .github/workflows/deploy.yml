@@ -55,9 +55,6 @@ jobs:
     - name: Install Dependencies
       run: composer install --no-interaction --no-progress --prefer-dist
 
-    - name: PHPStan Analysis
-      run: ./vendor/bin/phpstan analyse --memory-limit=2G
-
     - name: Copy Env
       run: cp .env.example .env
 
@@ -81,12 +78,13 @@ jobs:
 # PHPStan install
 # ===============================
     - name: PHPStan Install
-      run: composer require phpstan/phpstan --dev
+      run: composer require phpstan/phpstan --dev composer require --dev nunomaduro/larastan
 
 # ===============================
 # STATIC ANALYSIS (PHPStan + Larastan)
 # ===============================
-    
+    - name: PHPStan Analysis
+      run: ./vendor/bin/phpstan analyse app tests --memory-limit=2G
 
 # ===============================
 # SECURITY SCANS
