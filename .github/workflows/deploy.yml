@@ -75,6 +75,12 @@ jobs:
       continue-on-error: true
 
 # ===============================
+# PHPStan install
+# ===============================
+    - name: PHPStan Install
+      run: composer require phpstan/phpstan --dev
+      
+# ===============================
 # STATIC ANALYSIS (PHPStan + Larastan)
 # ===============================
     - name: PHPStan Analysis
