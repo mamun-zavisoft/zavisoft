@@ -78,7 +78,7 @@ jobs:
 # PHPStan install
 # ===============================
     - name: PHPStan Install
-      run: composer require phpstan/phpstan --dev composer require --dev nunomaduro/larastan
+      run: composer require phpstan/phpstan nunomaduro/larastan --dev --no-interaction
 
 # ===============================
 # STATIC ANALYSIS (PHPStan + Larastan)
