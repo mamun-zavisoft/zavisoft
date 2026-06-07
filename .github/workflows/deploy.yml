@@ -1,70 +1,245 @@
-name: Laravel CI-CD Pipeline
+name: Laravel 12 Enterprise CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main", "staging", "develop" ]
+
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  PHP_VERSION: 8.2
+  APP_ENV: testing
+  DB_DATABASE: testing
+  DB_USERNAME: root
+  DB_PASSWORD: root
 
 jobs:
-  # ---- PHASE 1: CONTINUOUS INTEGRATION (TESTING) ----
-  laravel-tests:
+
+# ===============================
+# 1. QUALITY GATE (CI)
+# ===============================
+  quality-gate:
+
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: testing
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
+
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Setup PHP Environment
+    - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '8.2'
-        extensions: mbstring, xml, ctype, iconv, mysql, zip, dom, fileinfo, pdo, sqlite3
+        php-version: ${{ env.PHP_VERSION }}
+        extensions: mbstring, bcmath, intl, pdo_mysql, zip, xml, iconv, dom, fileinfo, mysql, pod, sqlite3
+        coverage: xdebug
 
-    - name: Install Composer Dependencies
-      run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+    - name: Validate Composer
+      run: composer validate --strict
 
-    - name: Copy .env.example to .env for Testing
+    - name: Install Dependencies
+      run: composer install --no-interaction --prefer-dist
+
+    - name: Copy Env
       run: cp .env.example .env
 
-    - name: Generate Application Key
+    - name: Generate App Key
       run: php artisan key:generate
 
-    - name: Run PHPUnit Tests
-      run: vendor/bin/phpunit
+# ===============================
+# PHP SYNTAX CHECK
+# ===============================
+    - name: PHP Lint Check
+      run: find app routes database tests -name "*.php" -exec php -l {} \;
 
-  # ---- PHASE 2: CONTINUOUS DELIVERY (DEPLOYMENT) ----
-  deploy-to-production:
-    needs: laravel-tests
+# ===============================
+# CODE STYLE
+# ===============================
+    - name: Laravel Pint
+      run: ./vendor/bin/pint --test
+
+# ===============================
+# STATIC ANALYSIS (PHPStan + Larastan)
+# ===============================
+    - name: PHPStan Analysis
+      run: ./vendor/bin/phpstan analyse --memory-limit=2G
+
+# ===============================
+# SECURITY SCANS
+# ===============================
+    - name: Composer Audit
+      run: composer audit
+
+    - name: Install Gitleaks
+      run: |
+        curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_8.18.2_linux_x64.tar.gz | tar -xz
+        sudo mv gitleaks /usr/local/bin/
+
+    - name: Secret Scan (Gitleaks)
+      run: gitleaks detect --no-git --verbose
+
+# ===============================
+# SEMGREP SAST
+# ===============================
+    - name: Semgrep Scan
+      run: |
+        pip install semgrep
+        semgrep scan --config=auto
+
+# ===============================
+# ARCHITECTURE + DUPLICATION
+# ===============================
+    - name: Architecture Tests
+      run: php artisan test --testsuite=Architecture
+
+    - name: Duplicate Code Check
+      run: ./vendor/bin/phpcpd app --min-lines=20 --min-tokens=100
+
+# ===============================
+# DATABASE
+# ===============================
+    - name: Run Migrations
+      env:
+        DB_CONNECTION: mysql
+        DB_HOST: 127.0.0.1
+      run: php artisan migrate --force
+
+    - name: Run Seeders
+      run: php artisan db:seed --force
+
+# ===============================
+# TESTING
+# ===============================
+    - name: Unit Tests
+      run: php artisan test --testsuite=Unit
+
+    - name: Feature Tests
+      run: php artisan test --testsuite=Feature
+
+# ===============================
+# COVERAGE (90% ENFORCEMENT)
+# ===============================
+    - name: Coverage Check
+      run: |
+        php artisan test --coverage --min=90
+
+# ===============================
+# BROWSER TEST (DUSK)
+# ===============================
+    - name: Install Chrome
+      run: sudo apt-get install -y google-chrome-stable
+
+    - name: Run Dusk Tests
+      run: php artisan dusk
+
+# ===============================
+# CACHE VALIDATION
+# ===============================
+    - name: Laravel Optimization Check
+      run: |
+        php artisan config:cache
+        php artisan route:cache
+        php artisan view:cache
+
+# ===============================
+# SONARQUBE SCAN
+# ===============================
+    - name: SonarQube Analysis
+      env:
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        sonar-scanner \
+          -Dsonar.projectKey=laravel-app \
+          -Dsonar.sources=. \
+          -Dsonar.host.url=$SONAR_HOST_URL \
+          -Dsonar.login=$SONAR_TOKEN
+
+# ===============================
+# ARTIFACT BUILD
+# ===============================
+    - name: Build Artifact
+      run: tar -czf app.tar.gz .
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: laravel-app
+        path: app.tar.gz
+
+
+# ===============================
+# 2. DEPLOYMENT (PRODUCTION)
+# ===============================
+  deploy-production:
+
+    needs: quality-gate
     runs-on: ubuntu-latest
 
+    if: github.ref == 'refs/heads/main'
+
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
 
-    - name: Deploy to Server via SSH
-      uses: appleboy/ssh-action@v1.0.3
+    - name: Download Artifact
+      uses: actions/download-artifact@v4
       with:
-        host: ${{ secrets.SERVER_IP }}
-        username: ubuntu
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        script: |
-          cd /var/www/html/zavisoft
-          
-          echo "🚀 Fetching latest code from Git..."
-          git pull origin main
-          
-          echo "📦 Installing Production Dependencies..."
-          composer install --no-dev --optimize-autoloader --no-interaction
-          
-          echo "⚡ Optimizing Laravel Configuration..."
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache
-          
-          echo "🗄️ Running Database Migrations..."
-          php artisan migrate --force
-          
-          echo "🧹 Clearing Cache..."
-          php artisan cache:clear
-          
-          echo "🎉 Deployment Completed Successfully!"
+        name: laravel-app
 
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+# ===============================
+# ZERO DOWNTIME DEPLOYMENT
+# ===============================
+    - name: Deploy to Server (Release Strategy)
+      run: |
+        ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+
+        set -e
+
+        APP_DIR=/var/www/laravel-app
+        RELEASES=$APP_DIR/releases
+        CURRENT=$APP_DIR/current
+        TIMESTAMP=$(date +%Y%m%d%H%M%S)
+
+        mkdir -p $RELEASES/$TIMESTAMP
+
+        echo "Extracting build..."
+        tar -xzf app.tar.gz -C $RELEASES/$TIMESTAMP
+
+        cd $RELEASES/$TIMESTAMP
+
+        composer install --no-dev --optimize-autoloader
+
+        php artisan migrate --force
+        php artisan config:cache
+        php artisan route:cache
+        php artisan view:cache
+
+        ln -sfn $RELEASES/$TIMESTAMP $CURRENT
+
+        sudo systemctl reload nginx
+        sudo systemctl reload php8.2-fpm
+
+        echo "Deployment Successful"
+
+        EOF
