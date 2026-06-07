@@ -151,8 +151,16 @@ jobs:
     - name: Install Chrome
       run: sudo apt-get install -y google-chrome-stable
 
+    - name: Upgrade Chrome Driver
+      run: php artisan dusk:chrome-driver
+
+    - name: Start Chrome Driver
+      run: ./vendor/laravel/dusk/bin/chromedriver-linux --port=9515 &
+
     - name: Run Dusk Tests
       run: php artisan dusk
+      env:
+        APP_URL: http://127.0.0.1:8000 # আপনার টেস্ট সার্ভারের URL
 
 # ===============================
 # CACHE VALIDATION
