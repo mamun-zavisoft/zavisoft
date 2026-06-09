@@ -191,7 +191,7 @@ jobs:
         path: build/laravel-app.tar.gz
 
     - name: Extract Artifact
-      run: tar -xzf ../laravel-app.tar.gz -C.
+      run: tar -xzf build/laravel-app.tar.gz -C.
 
     - name: Setup SSH
       run: |
