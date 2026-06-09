@@ -216,6 +216,8 @@ jobs:
 
         sudo mkdir -p $RELEASES/$TIMESTAMP
 
+        sudo chown -R ubuntu:ubuntu $RELEASES/$TIMESTAMP
+
         echo "Cloning latest code from GitHub..."
         git clone -b main https://github.com/mamun-zavisoft/zavisoft.git $RELEASES/$TIMESTAMP
 
