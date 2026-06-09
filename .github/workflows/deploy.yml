@@ -214,7 +214,7 @@ jobs:
         CURRENT=$APP_DIR/current
         TIMESTAMP=$(date +%Y%m%d%H%M%S)
 
-        mkdir -p $RELEASES/$TIMESTAMP
+        sudo mkdir -p $RELEASES/$TIMESTAMP
 
         echo "Extracting build..."
         tar -xzf app.tar.gz -C $RELEASES/$TIMESTAMP
