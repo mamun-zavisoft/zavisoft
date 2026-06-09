@@ -214,7 +214,7 @@ jobs:
         CURRENT=$APP_DIR/current
         TIMESTAMP=$(date +%Y%m%d%H%M%S)
 
-        sudo mkdir -p $RELEASES/$TIMESTAMP
+        mkdir -p $RELEASES/$TIMESTAMP
 
         sudo chown -R ubuntu:ubuntu $RELEASES/$TIMESTAMP
 
