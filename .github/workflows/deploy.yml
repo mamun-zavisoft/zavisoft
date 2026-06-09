@@ -216,8 +216,8 @@ jobs:
 
         sudo mkdir -p $RELEASES/$TIMESTAMP
 
-        echo "Extracting build..."
-        tar -xzf app.tar.gz -C $RELEASES/$TIMESTAMP
+        echo "Cloning latest code from GitHub..."
+        git clone -b main https://github.com/mamun-zavisoft/zavisoft.git $RELEASES/$TIMESTAMP
 
         cd $RELEASES/$TIMESTAMP
 
