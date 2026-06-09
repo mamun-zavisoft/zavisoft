@@ -203,38 +203,30 @@ jobs:
 # ===============================
 # ZERO DOWNTIME DEPLOYMENT
 # ===============================
-    - name: Deploy to Server (Release Strategy)
-      run: |
-        ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-
-        set -e
-
-        APP_DIR=/var/www/laravel-app
-        RELEASES=$APP_DIR/releases
-        CURRENT=$APP_DIR/current
-        TIMESTAMP=$(date +%Y%m%d%H%M%S)
-
-        mkdir -p $RELEASES/$TIMESTAMP
-
-        sudo chown -R ubuntu:ubuntu $RELEASES/$TIMESTAMP
-
-        echo "Cloning latest code from GitHub..."
-        git clone -b main https://github.com/mamun-zavisoft/zavisoft.git $RELEASES/$TIMESTAMP
-
-        cd $RELEASES/$TIMESTAMP
-
-        composer install --no-dev --optimize-autoloader
-
-        php artisan migrate --force
-        php artisan config:cache
-        php artisan route:cache
-        php artisan view:cache
-
-        ln -sfn $RELEASES/$TIMESTAMP $CURRENT
-
-        sudo systemctl reload nginx
-        sudo systemctl reload php8.2-fpm
-
-        echo "Deployment Successful"
-
-        EOF
+    - name: Deploy to Server via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ubuntu
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          cd /var/www/html/laravel-app
+          
+          echo "🚀 Fetching latest code from Git..."
+          git pull origin main
+          
+          echo "📦 Installing Production Dependencies..."
+          composer install --no-dev --optimize-autoloader --no-interaction
+          
+          echo "⚡ Optimizing Laravel Configuration..."
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          
+          echo "🗄️ Running Database Migrations..."
+          php artisan migrate --force
+          
+          echo "🧹 Clearing Cache..."
+          php artisan cache:clear
+          
+          echo "🎉 Deployment Completed Successfully!"
