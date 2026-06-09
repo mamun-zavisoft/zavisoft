@@ -216,7 +216,7 @@ jobs:
           git pull origin main
           
           echo "📦 Installing Production Dependencies..."
-          composer install --no-dev --optimize-autoloader --no-interaction
+          /usr/bin/composer install --no-dev --optimize-autoloader --no-interaction
           
           echo "⚡ Optimizing Laravel Configuration..."
           php artisan config:cache
