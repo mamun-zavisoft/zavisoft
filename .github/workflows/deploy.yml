@@ -180,13 +180,15 @@ jobs:
     steps:
 
     - name: Build Artifact
-      run: tar -czf ../laravel-app.tar.gz --exclude=.git .
+      run: |
+        mkdir -p build
+        tar -czf ../laravel-app.tar.gz --exclude=.git .
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: laravel-app  # এই নামটির সাথেই নিচের ডাউনলোড নাম মিলতে হবে
-        path: ../laravel-app.tar.gz
+        path: build/laravel-app.tar.gz
 
     - name: Extract Artifact
       run: tar -xzf ../laravel-app.tar.gz -C.
